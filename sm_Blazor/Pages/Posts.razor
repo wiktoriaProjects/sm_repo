@@ -1,0 +1,83 @@
+﻿@page "/posts"
+@inject sm_Blazor.Services.PostService PostService
+@inject sm_Blazor.Services.AuthService AuthService
+@inject AuthenticationStateProvider AuthProvider
+@inject AuthenticationState AuthState
+
+<head>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<div class="posts-container">
+    <h2>Posts</h2>
+
+    <div class="post-form">
+        <input @bind="NewPostTitle" placeholder="Post Title" class="input-field" />
+        <textarea @bind="NewPostContent" placeholder="Write something..." class="input-field"></textarea>
+        <button class="btn-submit" @onclick="CreatePost">Post</button>
+    </div>
+
+    <div class="post-list">
+        @if (PostList == null)
+        {
+            <p>Loading posts...</p>
+        }
+        else if (PostList.Count == 0)
+        {
+            <p>No posts available.</p>
+        }
+        else
+        {
+            @foreach (var post in PostList)
+            {
+                <div class="post">
+                    <h3>@post.Title</h3>
+                    <p>@post.Content</p>
+                    <small>Posted on @post.CreatedAt</small>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private List<PostDto> PostList = new();
+    private string NewPostTitle = "";
+    private string NewPostContent = "";
+    private string UserId = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity.IsAuthenticated)
+        {
+            UserId = AuthService.GetUserId();
+        }
+        await LoadPosts();
+    }
+
+    private async Task LoadPosts()
+    {
+        PostList = await PostService.GetPosts();
+    }
+
+    private async Task CreatePost()
+    {
+        if (!string.IsNullOrWhiteSpace(NewPostTitle) && !string.IsNullOrWhiteSpace(NewPostContent))
+        {
+            var success = await PostService.CreatePost(new CreatePostDto
+                {
+                    Title = NewPostTitle,
+                    Content = NewPostContent
+                });
+
+            if (success)
+            {
+                NewPostTitle = "";
+                NewPostContent = "";
+                await LoadPosts(); // 
+            }
+        }
+    }
+}
+ 

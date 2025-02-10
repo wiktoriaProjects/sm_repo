@@ -1,0 +1,71 @@
+﻿@page "/"
+@inject NavigationManager NavManager
+
+<head>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<div class="container">
+    <h1>+Social Media App+</h1>
+    <div class="button-group">
+        <button class="btn-register" @onclick="GoToRegister">Register</button>
+        <button class="btn-login" @onclick="GoToLogin">Login</button>
+    </div>
+</div>
+
+@code {
+    private void GoToRegister() => NavManager.NavigateTo("/auth?mode=register");
+    private void GoToLogin() => NavManager.NavigateTo("/auth?mode=login");
+}
+
+
+
+
+
+
+
+@* @page "/login"
+@inject sm_Blazor.Services.AuthService AuthService
+@inject NavigationManager NavManager
+
+<h3>Login</h3>
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <p class="text-danger">@ErrorMessage</p>
+}
+
+<form @onsubmit="HandleLogin">
+    <div>
+        <label>Email:</label>
+        <input @bind="Email" class="form-control" />
+    </div>
+
+    <div>
+        <label>Password:</label>
+        <input type="password" @bind="Password" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Login</button>
+</form>
+
+@code 
+{
+    private string Email;
+    private string Password;
+    private string ErrorMessage;
+
+    private async Task HandleLogin()
+    {
+        var token = await AuthService.Login(Email, Password);
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            await AuthStateProvider.MarkUserAsAuthenticated(token);
+            NavManager.NavigateTo("/");
+        }
+        else
+        {
+            ErrorMessage = "Invalid login attempt.";
+        }
+    }
+} *@

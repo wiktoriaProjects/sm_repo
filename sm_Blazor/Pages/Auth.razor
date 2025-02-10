@@ -1,0 +1,115 @@
+﻿@page "/auth"
+@inject NavigationManager NavManager
+@inject sm_Blazor.Services.AuthService AuthService
+
+<head>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<div class="auth-container">
+    <h2>@(IsRegisterMode ? "Register" : "Login")</h2>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <p class="text-danger">@ErrorMessage</p>
+    }
+
+    @if (IsRegisterMode)
+    {
+        <div class="input-group">
+            <label>Username</label>
+            <input @bind="UserName" type="text" placeholder="Enter your username" />
+        </div>
+    }
+
+    <div class="input-group">
+        <label>Email</label>
+        <input @bind="Email" type="email" placeholder="Enter your email" />
+    </div>
+
+    <div class="input-group">
+        <label>Password</label>
+        <input @bind="Password" type="password" placeholder="Enter your password" />
+    </div>
+
+    @if (IsRegisterMode)
+    {
+        <div class="input-group">
+            <label>Confirm Password</label>
+            <input @bind="ConfirmPassword" type="password" placeholder="Confirm your password" />
+        </div>
+    }
+
+    <div class="button-group">
+        <button class="btn-submit @(IsRegisterMode ? "btn-register" : "btn-login")" @onclick="HandleSubmit">
+            @(IsRegisterMode ? "Register" : "Login")
+        </button>
+    </div>
+</div>
+@* <div class="auth-container">
+    <h2>@(IsRegisterMode ? "Register" : "Login")</h2>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <p class="text-danger">@ErrorMessage</p>
+    }
+    @if (IsRegisterMode)
+    {
+        <input @bind="UserName" type="text" placeholder="Username" />
+    }
+    <input @bind="Email" type="email" placeholder="Email" />
+    <input @bind="Password" type="password" placeholder="Password" />
+    
+    @if (IsRegisterMode)
+    {
+        <input @bind="ConfirmPassword" type="password" placeholder="Confirm Password" />
+    }
+    
+    <button class="btn-submit @(IsRegisterMode ? "btn-register" : "btn-login")" @onclick="HandleSubmit">
+        @(IsRegisterMode ? "Register" : "Login")
+    </button>
+</div> *@
+
+@code {
+    private bool IsRegisterMode;
+    private string UserName;
+    private string Email;
+    private string Password;
+    private string ConfirmPassword;
+    private string ErrorMessage;
+
+    protected override void OnInitialized()
+    {
+        // Manually extract query parameters from URL
+        var uri = new Uri(NavManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        IsRegisterMode = query["mode"] == "register";
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (IsRegisterMode)
+        {
+            var success = await AuthService.Register(UserName, Email, Password, ConfirmPassword);
+            if (success)
+            {
+                NavManager.NavigateTo("/auth?mode=login");
+            }
+            else
+            {
+                ErrorMessage = "Registration failed, check if your password is long enough!";
+            }
+        }
+        else
+        {
+            var success = await AuthService.Login(Email, Password);
+            if (success)
+            {
+                NavManager.NavigateTo("/posts");
+            }
+            else
+            {
+                ErrorMessage = "Invalid login attempt. Does your account exist?";
+            }
+        }
+    }
+}

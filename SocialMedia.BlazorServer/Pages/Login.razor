@@ -1,0 +1,43 @@
+﻿@page "/login"
+@inject SocialMedia.BlazorServer.Services.AuthService AuthService
+@inject NavigationManager NavManager
+
+<h3>Login</h3>
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <p class="text-danger">@ErrorMessage</p>
+}
+
+<form @onsubmit="HandleLogin">
+    <div>
+        <label>Email:</label>
+        <input @bind="Email" class="form-control" />
+    </div>
+
+    <div>
+        <label>Password:</label>
+        <input type="password" @bind="Password" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Login</button>
+</form>
+
+@code {
+    private string Email;
+    private string Password;
+    private string ErrorMessage;
+
+    private async Task HandleLogin()
+    {
+        var token = await AuthService.Login(Email, Password);
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            NavManager.NavigateTo("/");
+        }
+        else
+        {
+            ErrorMessage = "Invalid login attempt.";
+        }
+    }
+}

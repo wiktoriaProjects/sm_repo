@@ -1,0 +1,24 @@
+﻿@page "/dashboard"
+@inject NavigationManager NavManager
+@inject sm_Blazor.Services.AuthService AuthService
+
+<head>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<div class="dashboard-container">
+    <h2>Welcome to Your Dashboard!</h2>
+
+    <div class="button-container">
+        <button class="btn-logout" @onclick="Logout">Logout</button>
+    </div>
+</div>
+
+@code {
+    private async Task Logout()
+    {
+        await AuthService.Logout();
+        NavManager.NavigateTo("/auth?mode=login");
+    }
+}
+

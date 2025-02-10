@@ -1,0 +1,13 @@
+﻿@namespace sm_Blazor
+
+<Router AppAssembly="@typeof(Main).Assembly">
+    <Found Context="routeData">
+
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p>Sorry, the page was not found.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
