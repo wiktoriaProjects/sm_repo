@@ -1,8 +1,10 @@
-﻿@page "/posts"
+﻿
+
+ @page "/posts"
 @inject sm_Blazor.Services.PostService PostService
 @inject sm_Blazor.Services.AuthService AuthService
-@inject AuthenticationStateProvider AuthProvider
-@inject AuthenticationState AuthState
+ @inject AuthenticationStateProvider AuthProvider
+@* @inject AuthenticationState AuthState *@ 
 
 <head>
     <link rel="stylesheet" href="css/style.css" />
@@ -10,11 +12,14 @@
 
 <div class="posts-container">
     <h2>Posts</h2>
-
+    @if (!string.IsNullOrEmpty(UserName))
+    {
+        <p>Welcome, <b>@UserName</b>!</p>
+    }
     <div class="post-form">
         <input @bind="NewPostTitle" placeholder="Post Title" class="input-field" />
         <textarea @bind="NewPostContent" placeholder="Write something..." class="input-field"></textarea>
-        <button class="btn-submit" @onclick="CreatePost">Post</button>
+         <button class="btn-submit" @onclick="CreatePost">Post</button> 
     </div>
 
     <div class="post-list">
@@ -33,7 +38,10 @@
                 <div class="post">
                     <h3>@post.Title</h3>
                     <p>@post.Content</p>
-                    <small>Posted on @post.CreatedAt</small>
+                    <small>
+                        Posted by <b>@post.UserName</b> on @post.CreatedAt
+                    </small>
+                    
                 </div>
             }
         }
@@ -45,14 +53,17 @@
     private string NewPostTitle = "";
     private string NewPostContent = "";
     private string UserId = "";
+    private string UserName = "";
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthProvider.GetAuthenticationStateAsync();
-        if (authState.User.Identity.IsAuthenticated)
-        {
-            UserId = AuthService.GetUserId();
-        }
+        //var authState = await AuthProvider.GetAuthenticationStateAsync();
+        // if (authState.User.Identity.IsAuthenticated)
+        // {
+        //     UserId = AuthService.GetUserId();
+        // }
+        UserId = await AuthService.GetUserId();
+        UserName = await AuthService.GetUserName();
         await LoadPosts();
     }
 
@@ -68,7 +79,9 @@
             var success = await PostService.CreatePost(new CreatePostDto
                 {
                     Title = NewPostTitle,
-                    Content = NewPostContent
+                    Content = NewPostContent,
+                    UserId = UserId,  
+                    UserName = UserName  
                 });
 
             if (success)
@@ -80,4 +93,25 @@
         }
     }
 }
- 
+  
+
+@* 
+<h3>Posts</h3>
+
+@if (authState == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <p>Welcome, @authState.User.Identity.Name</p>
+}
+
+@code {
+    private AuthenticationState authState;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authState = await AuthProvider.GetAuthenticationStateAsync();
+    }
+} *@

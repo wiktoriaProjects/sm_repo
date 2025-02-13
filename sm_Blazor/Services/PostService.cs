@@ -2,7 +2,7 @@
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using sm_Blazor.Services;
+
 namespace sm_Blazor.Services
 {
     public class PostService
@@ -18,11 +18,10 @@ namespace sm_Blazor.Services
 
         public async Task<List<PostDto>> GetPosts()
         {
-            //return await _httpClient.GetFromJsonAsync<List<PostDto>>("https://localhost:7187/api/posts");
-            string userId = _authService.GetUserId();
-            if (string.IsNullOrEmpty(userId)) return new List<PostDto>();
-
-            return await _httpClient.GetFromJsonAsync<List<PostDto>>($"api/posts/user/{userId}");
+            return await _httpClient.GetFromJsonAsync<List<PostDto>>("https://localhost:7187/api/posts");
+            //string userId = await _authService.GetUserId();
+            //if (string.IsNullOrEmpty(userId)) return new List<PostDto>();
+            //return await _httpClient.GetFromJsonAsync<List<PostDto>>($"api/posts/user/{userId}");
         }
 
         public async Task<bool> CreatePost(CreatePostDto postDto)
@@ -30,12 +29,18 @@ namespace sm_Blazor.Services
             //var response = await _httpClient.PostAsJsonAsync("https://localhost:7187/api/posts", postDto);
 
 
-            string userId = _authService.GetUserId();
-            if (string.IsNullOrEmpty(userId)) return false;
+            //string userId = await _authService.GetUserId();
+            //if (string.IsNullOrEmpty(userId)) return false;
 
-            postDto.UserId = userId;
+            //postDto.UserId = userId;
 
-            var response = await _httpClient.PostAsJsonAsync("api/posts", postDto);
+            var userId = await _authService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                Console.WriteLine("No user ID found! You must be logged in.");
+                return false;
+            }
+            var response = await _httpClient.PostAsJsonAsync("https://localhost:7187/api/posts", postDto);
 
             return response.IsSuccessStatusCode;
         }
@@ -47,6 +52,7 @@ namespace sm_Blazor.Services
         public string Title { get; set; }
         public string Content { get; set; }
         public string CreatedAt { get; set; }
+        public string UserName { get; set; }
     }
 
     
@@ -54,5 +60,8 @@ namespace sm_Blazor.Services
     {
         public string Title { get; set; }
         public string Content { get; set; }
+        public string UserId { get; set; }
+        public string UserName { get; set; }
+
     }
 }

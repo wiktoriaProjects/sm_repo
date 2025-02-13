@@ -1,39 +1,61 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">sm_Blazor</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
+﻿@inject AuthService AuthService
+@inject NavigationManager Navigation
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </div>
-    </nav>
-</div>
+<nav class="nav-menu">
+    <a href="/">Home</a>
+    <a href="/posts">Posts</a>
+    <a href="/mypage">My Page</a>
+    
+    
+</nav>
+<nav class="nav-menu">
+    @if (!string.IsNullOrEmpty(userName))
+    {
+        <span class="user-name">👤 @userName</span>
+        <button class="logout-btn" @onclick="Logout">❌ Logout</button>
+    }
+</nav>
 
 @code {
-    private bool collapseNavMenu = true;
+    private string? userName;
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
+    protected override async Task OnInitializedAsync()
     {
-        collapseNavMenu = !collapseNavMenu;
+        userName = await AuthService.GetUserName();
+        StateHasChanged();
+    }
+
+    private async Task Logout()
+    {
+        await AuthService.Logout();
+        userName = null;
+        Navigation.NavigateTo("/", forceLoad: true); // Redirect to home after logout
     }
 }
+
+<style>
+    
+
+        .nav-menu a {
+            text-decoration: none;
+            color: black;
+            font-weight: bold;
+        }
+
+    .user-name {
+        margin-left: right;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .logout-btn {
+        padding: 3px 8px;
+        background: grey
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+   
+</style>

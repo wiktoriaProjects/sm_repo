@@ -29,16 +29,16 @@ builder.Services.AddCors(options =>
 //builder.Services.AddAuthorization();
 var app = builder.Build();
 
-//  Database vreation on Startup
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<PostDbContext>();
-    context.Database.Migrate();
-}
+////  Database vreation on Startup
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
+//    var context = services.GetRequiredService<PostDbContext>();
+//    context.Database.Migrate();
+//}
 
 //  Middleware
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 //app.UseAuthorization();
 app.MapControllers();

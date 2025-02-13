@@ -30,6 +30,8 @@ namespace IdentityApi.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(new LoginResponseDto { IsAuthSuccessful = false, ErrorMessage = "Invalid login attempt" });
+            Console.WriteLine($"Attempting login for email {loginDto.Email}");
+
 
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user == null)
@@ -40,7 +42,7 @@ namespace IdentityApi.Controllers
                 return Unauthorized(new LoginResponseDto { IsAuthSuccessful = false, ErrorMessage = "Invalid email or password" });
 
             var token = GenerateJwtToken(user);
-            return Ok(new LoginResponseDto { IsAuthSuccessful = true, Token = token });
+            return Ok(new LoginResponseDto { IsAuthSuccessful = true, Token = token, UserName = user.UserName });
         }
 
         private string GenerateJwtToken(User user)

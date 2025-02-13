@@ -102,6 +102,7 @@
         else
         {
             var success = await AuthService.Login(Email, Password);
+           
             if (success)
             {
                 NavManager.NavigateTo("/posts");

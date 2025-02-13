@@ -1,0 +1,91 @@
+
+networks:
+    backend:
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqlserver
+    environment:
+      SA_PASSWORD: "YourPassword123!"
+      ACCEPT_EULA: "Y"
+    restart: on-failure
+    ports:
+      - "1434:1433"
+    networks: 
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep sqlservr || exit 1"]
+      #test: ["CMD", "bash", "/check.sh"]
+      # test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "YourPassword123!", "-Q", -C || "SELECT 1"]
+      interval: 10s
+      retries: 5
+
+  peopleapi:
+    image: peopleapi
+    build:
+      context: .
+      dockerfile: PeopleApi/Dockerfile
+    ports:
+      - "5149:80"
+    depends_on:
+      sqlserver:
+       condition: service_healthy
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PeopleDb;User Id=sa;Password=YourPassword123!;
+      - Jwt_Key=SuperSecretKey123456789!
+    networks: 
+      - backend
+
+  postapi:
+    image: postapi
+    build:
+      context: .
+      dockerfile: PostApi/Dockerfile
+    ports:
+      - "5188:80"
+    depends_on:
+      sqlserver:
+       condition: service_healthy
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PostDb;User Id=sa;Password=YourPassword123!;
+      - Jwt_Key=YourVeryStrongSecretKeyWithAtLeast16Chars
+    networks: 
+      - backend
+
+  identityapi:
+    image: identityapi
+    build:
+      context: .
+      dockerfile: IdentityApi/Dockerfile
+    ports:
+      - "5056:80"
+    depends_on:
+       sqlserver:
+        condition: service_healthy
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=IdentityDb;User Id=sa;Password=YourPassword123!;
+      - Jwt_Key=YourVeryStrongSecretKeyWithAtLeast16Chars
+    networks: 
+      - backend
+
+
+
+  sm_blazor:
+    image: smblazor 
+    build:
+      context: .
+      dockerfile: sm_Blazor/Dockerfile
+    depends_on:
+       identityapi:
+          condition: service_started
+       postapi:
+          condition: service_started
+       peopleapi:
+          condition: service_started
+    ports:
+      - "5014:80"
+    networks: 
+      - backend
+    
+
